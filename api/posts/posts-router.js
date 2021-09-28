@@ -8,12 +8,12 @@ router.get('/', async (req, res)=> {
         const posts = await Post.find();
         res.status(200).json(posts)
     }
-    catch{
+    catch (err) {
         res.status(500).json({
             message: "The posts information could not be retrieved"
         })
     }
-})
+});
 
 router.get('/:id', async (req, res)=> {
     try {
@@ -27,11 +27,53 @@ router.get('/:id', async (req, res)=> {
             res.status(200).json(post)
         }
     }
-    catch {
+    catch (err) {
         res.status(500).json({
             message: "The post information could not be retrieved"
         })
     }
-})
+});
 
+//put GET /api/posts/:id/comments here
+
+// router.post('/', async (req, res)=> {
+//     try {
+//         const { title, contents } = req.body;
+//         if (!title || !contents) {
+//             res.status(400).json({
+//                 message: "Please provide title and contents for the post"
+//             })
+//         } else { 
+//             const newPost = await Post.insert({title, contents});
+//             res.status(201).json(newPost)
+//         }
+//     }
+//     catch (err) {
+//         res.status(500).json({
+//             message: "There was an error while saving the post to the database"
+//         })
+//     }
+// })
+
+router.post('/', (req, res)=> {
+    const { title, contents } = req.body
+    if(!title || !contents) {
+        res.status(400).json({
+            message: "Please provide title and contents for the post"
+        })
+    } else {
+        Post.insert({ title, contents })
+            .then(({ id })=> {
+                return Post.findById(id)
+            })
+            .then(post => {
+                res.status(201).json(post)
+            })
+            .catch(err=> {
+                res.status(500).json({
+                    message: "There was an error while saving the post to the database"
+                })
+            })
+    }
+})
 module.exports = router;
